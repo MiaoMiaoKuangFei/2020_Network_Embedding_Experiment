@@ -6,12 +6,10 @@
 # @version: 2.0
 # @desc   : 复现Online-CTDNEs算法
 import time
-import pandas as pd
 import numpy as np
 from gensim.models import Word2Vec
 import logging
 import optparse
-from concurrent.futures import ThreadPoolExecutor
 import os
 
 
