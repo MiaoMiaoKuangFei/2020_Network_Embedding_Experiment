@@ -11,6 +11,7 @@ from gensim.models import Word2Vec
 import logging
 import optparse
 import os
+import util
 
 
 def sample_next_edge(curr_edge, legal_neighbour_edge):
@@ -94,7 +95,6 @@ class online_ctdns:
                 self.time_new_edge_dict.update({edge[2]: time_accord_edge})
 
             self.N = len(self.edge_dict.keys())
-            self.beta = self.r * self.N * (self.l - self.w + 1)  # 行走时间约束
             import_net_end = time.time()
             self.io_cost = self.io_cost + (import_net_end - import_net_start)
             logging.info("finish input dataset")
@@ -116,7 +116,7 @@ class online_ctdns:
             try:
                 texts = self.load_walk_set()
                 model = Word2Vec(texts, sg=1, size=self.d, window=10, min_count=0, workers=8)
-                model.save(self.result_path+'/model/' + str(i) + '_model')
+                model.save(self.result_path + '/model/' + str(i) + '_model')
             except Exception as e:
                 logging.info("walk is too less to train")
                 print(e)
@@ -144,7 +144,7 @@ class online_ctdns:
         #  batch处理边
         batch_walks_str = '\n'.join(walks)
         io_start = time.time()
-        with open(self.result_path+"/walk/walk.txt", 'a') as f:
+        with open(self.result_path + "/walk/walk.txt", 'a') as f:
             f.write(batch_walks_str)
             f.write('\n')
         io_end = time.time()
@@ -157,7 +157,7 @@ class online_ctdns:
         """
         load_walk_start = time.time()
         dataset = []
-        with open(self.result_path+"/walk/walk.txt", 'r') as f:
+        with open(self.result_path + "/walk/walk.txt", 'r') as f:
             sourceInLine = f.readlines()
             for line in sourceInLine:
                 dataset.append(line.strip('\n').split(', '))
@@ -222,21 +222,16 @@ if __name__ == '__main__':
     if not os.path.isdir(options.j):
         os.mkdir(options.j)
 
-    if not os.path.isdir(options.j+"/walk"):
-        os.mkdir(options.j+"/walk")
+    if not os.path.isdir(options.j + "/walk"):
+        os.mkdir(options.j + "/walk")
 
-    if not os.path.isdir(options.j+"/model"):
-        os.mkdir(options.j+"/model")
+    if not os.path.isdir(options.j + "/model"):
+        os.mkdir(options.j + "/model")
 
-    if not os.path.exists(options.j+"/walk/walk.txt"):
-        open(options.j+"/walk/walk.txt", 'w').close()
+    if not os.path.exists(options.j + "/walk/walk.txt"):
+        open(options.j + "/walk/walk.txt", 'w').close()
 
-    LOG_FORMAT = "%(asctime)s - %(levelname)s - %(message)s"  # 日志格式化输出
-    DATE_FORMAT = "%m/%d/%Y %H:%M:%S %p"  # 日期格式
-    fp = logging.FileHandler(options.j+"/online_ctdnes_log.log", encoding='gbk')
-    fs = logging.StreamHandler()
-    logging.basicConfig(level=logging.DEBUG, format=LOG_FORMAT, datefmt=DATE_FORMAT,
-                        handlers=[fp, fs])  # 调用handlers=[fp,fs]
+    util.log_def()
 
     logging.info("input：" + str(options))
     start = float(time.time())

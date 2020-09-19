@@ -1,25 +1,11 @@
 # @desc   : 完成点分类任务
-import pandas as pd
 import numpy as np
 import logging
-import sklearn
 from gensim.models import Word2Vec
-from sklearn.svm import SVC
-from sklearn.metrics import f1_score
 from gensim.models import KeyedVectors
-from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import train_test_split
-import math
 from sklearn.cluster import KMeans
 from sklearn import metrics as mr
-import optparse
-
-LOG_FORMAT = "%(asctime)s - %(levelname)s - %(message)s"  # 日志格式化输出
-DATE_FORMAT = "%m/%d/%Y %H:%M:%S %p"  # 日期格式
-fp = logging.FileHandler('config.log', encoding='utf-8')
-fs = logging.StreamHandler()
-logging.basicConfig(level=logging.DEBUG, format=LOG_FORMAT, datefmt=DATE_FORMAT,
-                    handlers=[fs, fp])  # 调用handlers=[fp,fs]
+import util
 
 
 class node_cluster:
@@ -72,15 +58,10 @@ class node_cluster:
 
 
 if __name__ == '__main__':
+    util.log_def()
+    options, args = util.model_choice_dataset_args("cluster")
+
     nc = node_cluster()
-    usage = "cluster"
-    parser = optparse.OptionParser(usage)  # 写入上面定义的帮助信息
-    parser.add_option('-m', dest='m', help='Model', type='str', default='model')
-    parser.add_option('-c', dest='c', help='choice', type='int', default=1)
-    parser.add_option('-d', dest='d', help='Whole Dataset', type='str', default='foursq2014_TKY_node_format.txt')
-
-    options, args = parser.parse_args()
-
     nc.import_model(options.m, options.c)
     nc.import_node(options.d)
     nc.cluster()

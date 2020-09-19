@@ -13,14 +13,7 @@ from sklearn.metrics import f1_score
 from gensim.models import KeyedVectors
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
-import optparse
-
-LOG_FORMAT = "%(asctime)s - %(levelname)s - %(message)s"  # 日志格式化输出
-DATE_FORMAT = "%m/%d/%Y %H:%M:%S %p"  # 日期格式
-fp = logging.FileHandler('config.log', encoding='utf-8')
-fs = logging.StreamHandler()
-logging.basicConfig(level=logging.DEBUG, format=LOG_FORMAT, datefmt=DATE_FORMAT,
-                    handlers=[fs, fp])  # 调用handlers=[fp,fs]
+import util
 
 
 class vertex_classification:
@@ -81,25 +74,20 @@ class vertex_classification:
         lr = LogisticRegression(C=1000.0, random_state=0)
         lr.fit(self.X_train, self.y_train)
         Y_predict_lr = lr.predict(self.X_test).tolist()
-        f1_lr = f1_score(self.y_test, Y_predict_lr, average='weighted')
-        print("经过lr训练的预测情况为：" + str(f1_lr))
+        print("lr_micro", f1_score(self.y_test, Y_predict_lr, average='micro'))
+        print("lr_weighted", f1_score(self.y_test, Y_predict_lr, average='weighted'))
+        print("lr_micro", f1_score(self.y_test, Y_predict_lr, average='macro'))
 
         svm = SVC(kernel='linear', C=1.0, random_state=0)
         svm.fit(self.X_train, self.y_train)
         Y_predict_svm = svm.predict(self.X_test).tolist()
-        f1_svm = f1_score(self.y_test, Y_predict_svm, average='weighted')
-        print("经过svm训练的预测情况为：" + str(f1_svm))
+        print("svm_micro", f1_score(self.y_test, Y_predict_svm, average='micro'))
+        print("svm_weighted", f1_score(self.y_test, Y_predict_svm, average='weighted'))
+        print("svm_macro", f1_score(self.y_test, Y_predict_svm, average='macro'))
 
 
 if __name__ == '__main__':
-    usage = "classification"
-
-    parser = optparse.OptionParser(usage)  # 写入上面定义的帮助信息
-    parser.add_option('-m', dest='m', help='Model', type='str', default='model')
-    parser.add_option('-c', dest='c', help='choice', type='int', default=1)
-    parser.add_option('-d', dest='d', help='Whole Dataset', type='str', default='foursq2014_TKY_node_format.txt')
-
-    options, args = parser.parse_args()
+    options, args = util.model_choice_dataset_args("clasification")
     nlf = vertex_classification()
     nlf.import_model(options.m, options.c)
     nlf.import_node(options.d)
