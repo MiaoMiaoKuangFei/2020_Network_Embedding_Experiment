@@ -17,8 +17,13 @@ def model_choice_dataset_args(usage):
 
 
 def log_def(log_file_name="log.log"):
-    logging.basicConfig(filename=log_file_name, filemode="w", format="%(asctime)s-%(name)s-%(levelname)s-%(message)s",
-                        level=logging.INFO)
+    import logging
+    LOG_FORMAT = "%(asctime)s - %(levelname)s - %(message)s"  # 日志格式化输出
+    DATE_FORMAT = "%m/%d/%Y %H:%M:%S %p"  # 日期格式
+    fp = logging.FileHandler(log_file_name, encoding='utf-8')
+    fs = logging.StreamHandler()
+    logging.basicConfig(level=logging.DEBUG, format=LOG_FORMAT, datefmt=DATE_FORMAT,
+                        handlers=[fp, fs])  # 调用handlers=[fp,fs]
 
 
 def parse_model_name(model_name):

@@ -101,14 +101,14 @@ class online_ctdns:
                 walk_index.reverse()
                 if self.w < len(walk_index) < self.l and walk_index != []:
                     walks.append(str(walk_index).replace('[', '').replace(']', ''))
-
-        batch_walks_str = '\n'.join(walks)
-        io_start = time.time()
-        with open(self.result_path + "/walk/walk.txt", 'a') as f:
-            f.write(batch_walks_str)
-            f.write('\n')
-        io_end = time.time()
-        self.io_cost = self.io_cost + io_end - io_start
+        if walks:
+            batch_walks_str = '\n'.join(walks)
+            io_start = time.time()
+            with open(self.result_path + "/walk/walk.txt", 'a') as f:
+                f.write(batch_walks_str)
+                f.write('\n')
+            io_end = time.time()
+            self.io_cost = self.io_cost + io_end - io_start
 
     def load_walk_set(self):
         """
