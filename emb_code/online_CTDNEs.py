@@ -37,6 +37,7 @@ class online_ctdns:
     """
     Online CTDNEs-Alg
     """
+
     def __init__(self, r, l, w, d, granularity, result_path, net_path):
         self.edge_dict = {}  # vertex -> edge
         self.net = []  # The whole net
@@ -58,48 +59,8 @@ class online_ctdns:
         import dataset from self.net_path
         :return:
         """
-        logging.info("start input dataset")
-        try:
-            import_net_start = time.time()
-            self.all_edge_list = np.loadtxt(self.net_path, delimiter='\t')
-            self.all_edge_list = self.all_edge_list.astype(np.int64)
-            for edge in self.all_edge_list:
-                if edge[0] == edge[1]:
-                    continue
-                back_node_accord_edge = self.edge_dict.get(edge[1])
-                front_node_accord_edge = self.edge_dict.get(edge[0])
-
-                if back_node_accord_edge is None:
-                    back_node_accord_edge = [[edge[0], edge[2]]]
-                else:
-                    back_node_accord_edge.append([edge[0], edge[2]])
-
-                self.edge_dict.update({edge[1]: back_node_accord_edge})
-
-                if front_node_accord_edge is None:
-                    front_node_accord_edge = [[edge[1], edge[2]]]
-                else:
-                    front_node_accord_edge.append([edge[1], edge[2]])
-
-                self.edge_dict.update({edge[0]: front_node_accord_edge})
-
-                time_accord_edge = self.time_new_edge_dict.get(edge[2])
-
-                if time_accord_edge is None:
-                    time_accord_edge = [edge[0:2].tolist(),
-                                        [edge[1], edge[0]]]
-                else:
-                    time_accord_edge.append(edge[0:2].tolist())
-                    time_accord_edge.append([edge[1], edge[0]])
-                self.time_new_edge_dict.update({edge[2]: time_accord_edge})
-
-            self.N = len(self.edge_dict.keys())
-            import_net_end = time.time()
-            self.io_cost = self.io_cost + (import_net_end - import_net_start)
-            logging.info("finish input dataset")
-        except Exception as e:
-            logging.error("Load dataset error!")
-            print(e)
+        self.edge_dict, self.time_new_edge_dict, io_cost = util.import_net(self.net_path)
+        self.io_cost = self.io_cost + io_cost
 
     def batch_update(self):
         """
@@ -136,10 +97,10 @@ class online_ctdns:
         walks = []
         for each_new_edge in curr_new_edge_arr:
             for i in range(walk_num):
-                walk_index = self.reverse_temporal_walk(each_new_edge.tolist())  # 这里简化为l，对结果影响不大
+                walk_index = self.reverse_temporal_walk(each_new_edge.tolist())
                 walk_index.reverse()
                 if self.w < len(walk_index) < self.l:
-                    walks.append(str(walk_index).replace('[', '').replace(']', ''))
+                    walks.append(str(walk_index).replace('[', '').replace(']', '') if walk_index != [] else '')
 
         batch_walks_str = '\n'.join(walks)
         io_start = time.time()
@@ -170,17 +131,15 @@ class online_ctdns:
         :return: Reverse temporal walk
         """
         curr_walk_index = start_edge[0:2]  # Fetch start_edge[0 and 1]
-        curr_edge = start_edge  # 当前的走到的边
-        for p in range(1, self.l - 1):  # 注意开闭
+        curr_edge = start_edge
+        for p in range(1, self.l - 1):
 
-            legal_neighbour_edge = self.find_all_legal_adjacent_edges(
-                curr_edge)  # 传入curr_edge可以相当于传入了时间和位置，每次更新curr_edge即可
-            #  需要按照时间次序排个序
+            legal_neighbour_edge = self.find_all_legal_adjacent_edges(curr_edge)
             if legal_neighbour_edge != [] and len(legal_neighbour_edge) > 0:
                 legal_neighbour_edge.sort(key=lambda x: x[1])
-                choose_neighbour = sample_next_edge(curr_edge, legal_neighbour_edge)  # 由于时序不减，所以后面不可能取到这个原来取过的边
-                curr_walk_index.append(choose_neighbour[1])  # 把下一个节点写进去
-                curr_edge = choose_neighbour  # 因为这个返回的就是一条完整的边，所以可以写这个
+                choose_neighbour = sample_next_edge(curr_edge, legal_neighbour_edge)
+                curr_walk_index.append(choose_neighbour[1])
+                curr_edge = choose_neighbour
             else:
                 return curr_walk_index
 
@@ -203,7 +162,7 @@ class online_ctdns:
 
 if __name__ == '__main__':
     usage = "Online CTDNEs params"
-    parser = optparse.OptionParser(usage)  # 写入上面定义的帮助信息
+    parser = optparse.OptionParser(usage)
     parser.add_option('-r', dest='r', help='Num of walks from each vertex', type='int', default=10)
     parser.add_option('-w', dest='w', help='Lower Bound of the path length', type='int', default=5)
     parser.add_option('-l', dest='l', help='Upper Bound of the path length', type='int', default=80)
@@ -226,7 +185,7 @@ if __name__ == '__main__':
     if not os.path.exists(options.j + "/walk/walk.txt"):
         open(options.j + "/walk/walk.txt", 'w').close()
 
-    util.log_def()
+    util.log_def(options.j + "/log.log")
 
     logging.info("input：" + str(options))
     start = float(time.time())
