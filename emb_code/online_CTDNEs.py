@@ -4,7 +4,7 @@
 # @author : Zhutian Lin
 # @date   : 2020/9/17
 # @version: 2.0
-# @desc   : 复现Online-CTDNEs算法
+# @desc   : Online-CTDNEs Alg
 import time
 import numpy as np
 from gensim.models import Word2Vec
@@ -16,39 +16,41 @@ import util
 
 def sample_next_edge(curr_edge, legal_neighbour_edge):
     """
-    按时间线性选择下一条边
-    :param curr_edge: 当前的边
-    :param legal_neighbour_edge: 邻边list
-    :return: 按概率取出一个符合要求的边,如果没有就返回为[]这个需要注意了！！
+    sample next edge by linear probability
+    :param curr_edge: Edge start the walk from
+    :param legal_neighbour_edge: adjacent edges from now one
+    :return: a chosen legal next edge
     """
-    mid_node = curr_edge[1]  # 这个curr_edge的node2充当中继点的作用
+    mid_node = curr_edge[1]
     if len(legal_neighbour_edge) == 0:
         return []
 
     prob_array = np.array(list(range(len(legal_neighbour_edge)))) + 1
     prob_array = prob_array / np.sum(prob_array)
-    index = np.random.choice(range(0, len(legal_neighbour_edge)), p=prob_array)  # 这里先写死为线性的，之后其他的再做实验
-    sample = [mid_node, legal_neighbour_edge[index][0], legal_neighbour_edge[index][1]]  # 合并为符合条件的新边
+    index = np.random.choice(range(0, len(legal_neighbour_edge)), p=prob_array)
+    sample = [mid_node, legal_neighbour_edge[index][0], legal_neighbour_edge[index][1]]
 
     return sample
 
 
 class online_ctdns:
-    def __init__(self, r, l, w, d, granularity, result_path,
-                 net_path="foursq2014_TKY_node_format.txt"):
-        self.edge_dict = {}  # 以后节点为索引的传播路径
-        self.net = []  # 整个原来的图
+    """
+    Online CTDNEs-Alg
+    """
+    def __init__(self, r, l, w, d, granularity, result_path, net_path):
+        self.edge_dict = {}  # vertex -> edge
+        self.net = []  # The whole net
         self.result_path = result_path
         self.net_path = net_path
         self.all_edge_list = []
-        self.time_new_edge_dict = {}  # 以时间为索引，边为value的dict
+        self.time_new_edge_dict = {}  # time -> edge
 
         self.N = len(self.edge_dict.keys())
-        self.r = r  # 以每个节点为起始位置应该走多长，本版本中没有用到
-        self.l = l  # 一个行走最长是多少
-        self.w = w  # 一个行走最短是多少
-        self.d = d  # embedding向量维度
-        self.granularity = granularity  # 切分粒度
+        self.r = r  # Count of walks from curr edge
+        self.l = l  # Upper bound of a walk
+        self.w = w  # Lower bound of a walk
+        self.d = d  # Dim of emb vec
+        self.granularity = granularity  # Granularity of each window(For batch update)
         self.io_cost = 0.0
 
     def import_net(self):
@@ -64,11 +66,9 @@ class online_ctdns:
             for edge in self.all_edge_list:
                 if edge[0] == edge[1]:
                     continue
-                #  输入的时候默认是有向边，现在修改成无向边
-                back_node_accord_edge = self.edge_dict.get(edge[1])  # 入度点对应的边
-                front_node_accord_edge = self.edge_dict.get(edge[0])  # 出度点对应的边
+                back_node_accord_edge = self.edge_dict.get(edge[1])
+                front_node_accord_edge = self.edge_dict.get(edge[0])
 
-                #  对点操作
                 if back_node_accord_edge is None:
                     back_node_accord_edge = [[edge[0], edge[2]]]
                 else:
@@ -83,7 +83,6 @@ class online_ctdns:
 
                 self.edge_dict.update({edge[0]: front_node_accord_edge})
 
-                # 对时间操作
                 time_accord_edge = self.time_new_edge_dict.get(edge[2])
 
                 if time_accord_edge is None:
@@ -103,6 +102,10 @@ class online_ctdns:
             print(e)
 
     def batch_update(self):
+        """
+        Batch update along the time stream according to the paper
+        :return:
+        """
         time_list = [each_time for each_time in self.time_new_edge_dict]
         for i in range(len(time_list) // self.granularity):
             logging.info("Current Progress :" + str(i / (len(time_list) // self.granularity)))
@@ -123,16 +126,13 @@ class online_ctdns:
 
     def random_walk(self, t, walk_num=30):
         """
-        静态的时序网络的embedding训练
-        :param t: 时间戳
-        :param walk_num: 行走数量
-        无返回值，向量均存在文件里
+        Walk and save to txt
+        :param t: timestamp
+        :param walk_num: count of walks
         """
-        #  做一个加上时间的新边表（下面就开始遍历新边了），对每个时间片的所有边都进行反向的随机游走
         edge_list_at_new_time = np.array(self.time_new_edge_dict.get(t))
-        curr_new_edge_arr = np.insert(edge_list_at_new_time, 2, values=t, axis=1)  # 新方法，加入一个时间列
+        curr_new_edge_arr = np.insert(edge_list_at_new_time, 2, values=t, axis=1)
 
-        #  对每个边都以一个batch一个batch地存边
         walks = []
         for each_new_edge in curr_new_edge_arr:
             for i in range(walk_num):
@@ -141,7 +141,6 @@ class online_ctdns:
                 if self.w < len(walk_index) < self.l:
                     walks.append(str(walk_index).replace('[', '').replace(']', ''))
 
-        #  batch处理边
         batch_walks_str = '\n'.join(walks)
         io_start = time.time()
         with open(self.result_path + "/walk/walk.txt", 'a') as f:
@@ -152,8 +151,8 @@ class online_ctdns:
 
     def load_walk_set(self):
         """
-        把walks读入，并且变成单词的集合格式
-        :return: 返回格式符合要求的dataset
+        Load walks and transfer into a list
+        :return: 2-dim walks list
         """
         load_walk_start = time.time()
         dataset = []
@@ -167,15 +166,15 @@ class online_ctdns:
 
     def reverse_temporal_walk(self, start_edge):
         """
-        调通
-        选出一个合法的游走路径
-        :return: 从给定节点下的合法游走路径
+        Walk a path reversely
+        :return: Reverse temporal walk
         """
         curr_walk_index = start_edge[0:2]  # Fetch start_edge[0 and 1]
         curr_edge = start_edge  # 当前的走到的边
         for p in range(1, self.l - 1):  # 注意开闭
 
-            legal_neighbour_edge = self.get_legal_neighbour_edges(curr_edge)  # 传入curr_edge可以相当于传入了时间和位置，每次更新curr_edge即可
+            legal_neighbour_edge = self.find_all_legal_adjacent_edges(
+                curr_edge)  # 传入curr_edge可以相当于传入了时间和位置，每次更新curr_edge即可
             #  需要按照时间次序排个序
             if legal_neighbour_edge != [] and len(legal_neighbour_edge) > 0:
                 legal_neighbour_edge.sort(key=lambda x: x[1])
@@ -187,15 +186,13 @@ class online_ctdns:
 
         return curr_walk_index
 
-    def get_legal_neighbour_edges(self, curr_edge):
+    def find_all_legal_adjacent_edges(self, curr_edge):
         """
-        反向游走
-        获取一系列的符合要求的edge，以curr_edge的node2为起点，以curr_edge的t为时间约束
-        :return legal_neighbour 就是一个二重list的结构，返回的是合法的邻边
+        Find all edges adjacent with current one,which satisfy the constraint of time
+        :return A list of adjacent edges
         """
-        #  注意curr_edge传进来的应当还是完整形态的node1，node2，time
-        next_node = curr_edge[1]  # 1是node2的索引
-        neighbour = self.edge_dict.get(next_node)  # 是查的出来的，接下来就是取一个合法邻居了
+        next_node = curr_edge[1]
+        neighbour = self.edge_dict.get(next_node)
         curr_time = curr_edge[2]
         if neighbour is None:
             return []
@@ -205,7 +202,6 @@ class online_ctdns:
 
 
 if __name__ == '__main__':
-
     usage = "Online CTDNEs params"
     parser = optparse.OptionParser(usage)  # 写入上面定义的帮助信息
     parser.add_option('-r', dest='r', help='Num of walks from each vertex', type='int', default=10)
@@ -215,10 +211,9 @@ if __name__ == '__main__':
     parser.add_option('-g', dest='g', help='Granularity for batch update', type='int', default=10000)
     parser.add_option('-s', dest='s', help='Path of Dataset', type='string', default='foursq2014_TKY_node_format.txt')
     parser.add_option('-j', dest='j', help='Dir of result', type='string', default='result')
-
     options, args = parser.parse_args()
 
-    #  初始化文件夹
+    #  initialize path and dir and file
     if not os.path.isdir(options.j):
         os.mkdir(options.j)
 

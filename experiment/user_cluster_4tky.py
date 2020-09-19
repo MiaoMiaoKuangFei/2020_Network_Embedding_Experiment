@@ -2,13 +2,11 @@ import pandas as pd
 import numpy as np
 from gensim.models import Word2Vec
 from sklearn.decomposition import PCA
-from matplotlib import pyplot as plt
+import util
 
 if __name__ == '__main__':
+    options,args = util.model_choice_dataset_args("user_cluster")
     pca_model = PCA(n_components=2)
-
-    op = 0  # 0：model类型，1：emb类型
-    model_name = "change2vec"
     #  这里是节点id->标签id（已经是标记好的二级标签）
     nodeId_2true_labelId = pd.read_csv("nodeID_labelID_tuple.csv")
     label_true_list = list(nodeId_2true_labelId.iloc[:, 1])
@@ -22,8 +20,8 @@ if __name__ == '__main__':
     vec_list = []
     id_list = []
     #  导入训练好的模型
-    if op == 0:
-        model = Word2Vec.load(model_name)
+    if options.c == 0:
+        model = Word2Vec.load(options.m)
         for i in range(len(nodeId_2true_labelId)):
             if i % 10000 == 0:
                 print(i, "轮，总共", len(nodeId_2true_labelId), "轮")
@@ -35,7 +33,7 @@ if __name__ == '__main__':
                 print(e)
                 continue
     else:
-        word_vectors = np.loadtxt(model_name, delimiter=' ')
+        word_vectors = np.loadtxt(options.m, delimiter=' ')
         for e, line in enumerate(word_vectors):
             if e == 50:
                 print(label_true_except_no_vec)
@@ -44,5 +42,7 @@ if __name__ == '__main__':
             if foo is not None:
                 label_true_except_no_vec.append(foo)
                 vec_list.append(line[1:-1])
+
+
 
 

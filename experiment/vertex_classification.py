@@ -87,9 +87,11 @@ class vertex_classification:
 
 
 if __name__ == '__main__':
-    options, args = util.model_choice_dataset_args("clasification")
+    options, args = util.model_choice_dataset_args("classification")
+    c = util.parse_model_name(options.m)
+
     nlf = vertex_classification()
-    nlf.import_model(options.m, options.c)
+    nlf.import_model(options.m, c)
     nlf.import_node(options.d)
     nlf.build_train_test()
     nlf.classify()

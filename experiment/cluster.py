@@ -60,8 +60,9 @@ class node_cluster:
 if __name__ == '__main__':
     util.log_def()
     options, args = util.model_choice_dataset_args("cluster")
+    c = util.parse_model_name(options.m)
 
     nc = node_cluster()
-    nc.import_model(options.m, options.c)
+    nc.import_model(options.m, c)
     nc.import_node(options.d)
     nc.cluster()
