@@ -99,8 +99,8 @@ class online_ctdns:
             for i in range(walk_num):
                 walk_index = self.reverse_temporal_walk(each_new_edge.tolist())
                 walk_index.reverse()
-                if self.w < len(walk_index) < self.l:
-                    walks.append(str(walk_index).replace('[', '').replace(']', '') if walk_index != [] else '')
+                if self.w < len(walk_index) < self.l and walk_index != []:
+                    walks.append(str(walk_index).replace('[', '').replace(']', ''))
 
         batch_walks_str = '\n'.join(walks)
         io_start = time.time()
