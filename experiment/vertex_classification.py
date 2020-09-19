@@ -77,7 +77,7 @@ class vertex_classification:
         print("lr_weighted", f1_score(self.y_test, Y_predict_lr, average='weighted'))
         print("lr_micro", f1_score(self.y_test, Y_predict_lr, average='macro'))
 
-        svm = SVC(kernel='linear', C=1.0, random_state=0)
+        svm = SVC(kernel='linear', C=1000.0, random_state=0)
         svm.fit(self.X_train, self.y_train)
         Y_predict_svm = svm.predict(self.X_test).tolist()
         print("svm_micro", f1_score(self.y_test, Y_predict_svm, average='micro'))
