@@ -22,7 +22,7 @@ def log_def(log_file_name="log.log"):
 
 
 def parse_model_name(model_name):
-    if re.match(model_name, '.emb$'):
+    if re.match('.emb$', model_name) is not None:
         return 0  # .emb
     else:
         return 1  # model
@@ -50,7 +50,7 @@ def import_node_label_dict(dsname):
     for edge in node_data:
         node_data_dict.update({str(int(edge[0])): str(int(edge[1]))})
         node_data_dict.update({str(int(edge[2])): str(int(edge[3]))})
-    del node_data_dict
+    return node_data_dict
 
 
 def import_net(net_path):

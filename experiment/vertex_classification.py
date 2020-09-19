@@ -54,7 +54,6 @@ class vertex_classification:
         for edge in node_data:
             self.node_dict.update({str(int(edge[0])): str(int(edge[1]))})
             self.node_dict.update({str(int(edge[2])): str(int(edge[3]))})
-        del node_data
 
     def build_train_test(self):
         logging.debug("build_train_test")
