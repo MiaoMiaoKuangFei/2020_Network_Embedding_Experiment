@@ -2,6 +2,7 @@
 Mainly reproduce the online-CTDNE alg and do experiments accordingly.
 # Algorithm
 Online-CTDNEs
+Metapath
 
 # Need
 - Numpy
