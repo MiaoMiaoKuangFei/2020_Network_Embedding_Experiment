@@ -10,7 +10,7 @@ import util
 
 class node_cluster:
     def __init__(self):
-        logging.info("初始化分类器")
+        logging.info("初始化聚类器")
         self.vectors_dict = {}  # 每个点对应的字典{点index(str):向量(nparray)} 这个str可不能带小数点
         self.node_dict = {}  # 每个点的label
         self.node_vec = []  # 备选点
@@ -43,7 +43,6 @@ class node_cluster:
 if __name__ == '__main__':
     util.log_def()
     options, args = util.model_choice_dataset_args("cluster")
-    c = util.parse_model_name(options.m)
 
     nc = node_cluster()
     nc.import_model(options.m)

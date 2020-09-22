@@ -27,7 +27,7 @@ def log_def(log_file_name="log.log"):
 
 
 def parse_model_name(model_name):
-    if re.match('.emb$', model_name) is not None:
+    if model_name.find(".emb") is not None:
         return 0  # .emb
     else:
         return 1  # model

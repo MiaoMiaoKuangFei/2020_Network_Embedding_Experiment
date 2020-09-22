@@ -66,7 +66,7 @@ class vertex_classification:
             if node_vec is not None and self.node_dict.get(node) is not None:
                 vec.append(node_vec)
                 label.append(int(self.node_dict.get(node)))
-        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(vec, label, test_size=0.25)
+        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(vec, label, test_size=0.1)
 
     def classify(self):
         logging.debug("classify")
