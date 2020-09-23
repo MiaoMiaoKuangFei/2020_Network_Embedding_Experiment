@@ -17,6 +17,7 @@ if __name__ == '__main__':
     parser.add_option('-s', dest='s', help='Path of Dataset', type='string', default='foursq2014_TKY_node_format.txt')
     parser.add_option('-j', dest='j', help='Dir of result', type='string', default='result')
     parser.add_option('-c', dest='c', help='Dataset', type='string', default='tky')
+    parser.add_option('-q', dest='q', help='Time seq', type='int', default=100000)
     options, args = parser.parse_args()
     c = options.c  # tky,enron
     #  initialize path and dir and file
@@ -41,7 +42,7 @@ if __name__ == '__main__':
     total_time = 0
     start = time.time()
     for tu in t_1_t_2_tuples_list:
-        t1_t2, t2_t1, io_1 = metapath_generator.load_metapath(options.s, tu[0], tu[1])
+        t1_t2, t2_t1, io_1 = metapath_generator.load_metapath(options.s, tu[0], tu[1],options.q)
         mt = metapath_generator.MetaPathGenerator(t1_t2, t2_t1)
         io_2 = mt.generate_random_212(options.j + "/walk/walk.txt", options.r, options.l)
         io_3 = mt.generate_random_121(options.j + "/walk/walk.txt", options.r, options.l)

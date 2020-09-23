@@ -3,13 +3,17 @@ import random
 import time
 
 
-def load_metapath(input_file, t1, t2):
+def load_metapath(input_file, t1, t2, seq):
     start = time.time()
     t1_t2 = dict()
     t2_t1 = dict()
     edges = np.loadtxt(input_file, delimiter="\t").astype(np.int).astype(str)
+    times = np.sort(edges[:, 4].astype(np.int))
+    threshold = times[-1 if seq >= len(times) else seq]
+    print("threshold:", threshold)
+    print(len(times))
     for edge in edges:
-        if edge[1] == edge[3] or edge[1] not in [t1, t2] or edge[3] not in [t1, t2]:
+        if edge[1] == edge[3] or edge[1] not in [t1, t2] or edge[3] not in [t1, t2] or int(edge[4]) > threshold:
             continue
 
         if (edge[1] == t1 and edge[3] == t2) or (edge[1] == t2 and edge[3] == t1):
@@ -31,14 +35,13 @@ def load_metapath(input_file, t1, t2):
 
 class MetaPathGenerator:
     def __init__(self, t1_t2_list, t2_t1_list):
-        # core -> t1 , peri -> t2
         self.t1_t2_list = t1_t2_list
         self.t2_t1_list = t2_t1_list
 
     def generate_random_212(self, outfile_name, num_walks, walk_length):
         io_time = 0
         outfile = open(outfile_name, 'a')
-        print(len(self.t2_t1_list)*num_walks)
+        print(len(self.t2_t1_list) * num_walks)
         for peri in self.t2_t1_list:
             peri0 = peri
             for j in range(0, num_walks):  # wnum walks
@@ -65,7 +68,7 @@ class MetaPathGenerator:
     def generate_random_121(self, outfile_name, num_walks, walk_length):
         io_time = 0
         outfile = open(outfile_name, 'a')
-        print(len(self.t1_t2_list)*num_walks)
+        print(len(self.t1_t2_list) * num_walks)
         for peri in self.t1_t2_list:
             peri0 = peri
             for j in range(0, num_walks):  # wnum walks
