@@ -29,12 +29,14 @@ if __name__ == '__main__':
             user_id.append(edge)
             user_type.append(np.argmax(cnt_type))
     vec = []
+    label = []
     for i, uid in enumerate(user_id):
-        vec.append(vertex2vec.get(str(uid)))
-
+        if vertex2vec.get(str(uid)) is not None:
+            vec.append(vertex2vec.get(str(uid)).tolist())
+            label.append(user_type[i])
     #  至此，就有了vec为user向量，user_type作为标签
     estimator = KMeans(n_clusters=9)  # 构造聚类器
     estimator.fit(vec)  # 聚类
     label_predict = estimator.predict(vec)  # 获取聚类标签
 
-    print(nmi(user_type, label_predict))
+    print(nmi(label, label_predict))

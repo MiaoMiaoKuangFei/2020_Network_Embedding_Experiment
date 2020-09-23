@@ -35,9 +35,9 @@ if __name__ == '__main__':
 
     util.log_def(options.j + "/log.log")
     if c == 'tky':
-        t_1_t_2_tuples_list = [('1', '0')]
+        t_1_t_2_tuples_list = [('1', '0')]  
     else:
-        t_1_t_2_tuples_list = [('1', '2'), ('3', '4'), ('5', '6'), ('7', '8'), ('9', '10')]
+        t_1_t_2_tuples_list = [('1', '2'), ('2', '4'), ('5', '6'), ('7', '8'), ('9', '10')]
     io_time = 0
     total_time = 0
     start = time.time()
