@@ -21,6 +21,7 @@ if __name__ == '__main__':
     options, args = parser.parse_args()
     c = options.c  # tky,enron
     #  initialize path and dir and file
+
     if not os.path.isdir(options.j):
         os.mkdir(options.j)
 
@@ -35,16 +36,19 @@ if __name__ == '__main__':
 
     util.log_def(options.j + "/log.log")
     if c == 'tky':
-        t_1_t_2_tuples_list = [('1', '0')]  
+        t_1_t_2_tuples_list = [('1', '0')]
     else:
-        t_1_t_2_tuples_list = [('1', '2'), ('2', '4'), ('5', '6'), ('7', '8'), ('9', '10')]
+        # t_1_t_2_tuples_list = [('1', '2'), ('2', '1'), ('4', '10'), ('5', '6'), ('6', '9'), ('7', '8'), ('8', '7'),
+        # ('9', '6'), ('10', '4')]
+        t_1_t_2_tuples_list = [('1', '2'), ('2', '1'), ('4', '5'), ('5', '4'), ('6', '7'), ('7', '6'), ('8', '9'),
+                               ('9', '8'), ('10', '1')]
     io_time = 0
     total_time = 0
     start = time.time()
     for tu in t_1_t_2_tuples_list:
-        t1_t2, t2_t1, io_1 = metapath_generator.load_metapath(options.s, tu[0], tu[1],options.q)
+        t1_t2, t2_t1, io_1 = metapath_generator.load_metapath(options.s, tu[0], tu[1], options.q)
         mt = metapath_generator.MetaPathGenerator(t1_t2, t2_t1)
-        io_2 = mt.generate_random_212(options.j + "/walk/walk.txt", options.r, options.l)
+        io_2 = 0  # mt.generate_random_212(options.j + "/walk/walk.txt", options.r, options.l)
         io_3 = mt.generate_random_121(options.j + "/walk/walk.txt", options.r, options.l)
         io_time = io_time + io_1 + io_2 + io_3
     load_walk_start = time.time()
