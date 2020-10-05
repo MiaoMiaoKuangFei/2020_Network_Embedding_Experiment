@@ -27,7 +27,7 @@ def log_def(log_file_name="log.log"):
 
 
 def parse_model_name(model_name):
-    if model_name.find(".emb") !=-1:
+    if model_name.find(".emb") != -1:
         return 0  # .emb
     else:
         return 1  # model
@@ -109,3 +109,18 @@ def import_net(net_path):
         logging.error("Load dataset error!")
         print(e)
         return edge_dict, time_dict, io_cost
+
+
+def import_edges(path, line_len='5'):
+    edges_data = np.loadtxt(path, delimiter="\t").tolist()
+    pos_sample = set([])
+    nodes = set([])
+    first = 0
+    second = 2 if line_len == '5' else 1
+    for edges in edges_data:
+        pos_sample.update([str(edges[first]), str(edges[second])])
+        pos_sample.update([str(edges[second]), str(edges[first])])
+        nodes.update(str(edges[first]))
+        nodes.update(str(edges[second]))
+
+        return pos_sample, nodes

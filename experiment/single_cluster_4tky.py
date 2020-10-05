@@ -27,7 +27,7 @@ if __name__ == '__main__':
     vec_list = []
 
     #  导入训练好的模型
-    if op == 0:
+    if op == 1:
         model = Word2Vec.load(options.m)
         for i in range(len(nodeId_2true_labelId)):
             if i % 10000 == 0:
@@ -50,9 +50,8 @@ if __name__ == '__main__':
     print("删除没有vec的点之后，正例数量为", len(label_true_except_no_vec))
     print("获取的vec列表长度为", len(vec_list))
     #  一共分标签到9类
-    for i in range(3):
-        estimator = KMeans(n_clusters=9)  # 构造聚类器
-        estimator.fit(vec_list)  # 聚类
-        label_predict = estimator.predict(vec_list)  # 获取聚类标签
+    estimator = KMeans(n_clusters=9)  # 构造聚类器
+    estimator.fit(vec_list)  # 聚类
+    label_predict = estimator.predict(vec_list)  # 获取聚类标签
 
-        print(nmi(label_true_except_no_vec, label_predict))
+    print(nmi(label_true_except_no_vec, label_predict))

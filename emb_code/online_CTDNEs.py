@@ -67,7 +67,8 @@ class online_ctdns:
         Batch update along the time stream according to the paper
         :return:
         """
-        time_list = [each_time for each_time in self.time_new_edge_dict]
+
+        time_list = [each_time for each_time in sorted(list(set(self.time_new_edge_dict.keys())))]
         for i in range(len(time_list) // self.granularity):
             logging.info("Current Progress :" + str(i / (len(time_list) // self.granularity)))
             if (i + 1) * self.granularity >= len(time_list):

@@ -10,6 +10,8 @@ def load_metapath(input_file, t1, t2, seq):
     edges = np.loadtxt(input_file, delimiter="\t").astype(np.int).astype(str)
     times = np.sort(edges[:, 4].astype(np.int))
     threshold = times[-1 if seq >= len(times) else seq]
+    print(len(times))
+    print(len(set(times)))
     print("threshold:", threshold)
     print(len(times))
     for edge in edges:
