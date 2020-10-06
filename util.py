@@ -112,15 +112,14 @@ def import_net(net_path):
 
 
 def import_edges(path, line_len='5'):
-    edges_data = np.loadtxt(path, delimiter="\t").tolist()
-    pos_sample = set([])
-    nodes = set([])
+    edges_data = np.loadtxt(path, delimiter="\t").astype(np.int).tolist()
+    pos_sample = []
+    nodes = []
     first = 0
     second = 2 if line_len == '5' else 1
     for edges in edges_data:
-        pos_sample.update([str(edges[first]), str(edges[second])])
-        pos_sample.update([str(edges[second]), str(edges[first])])
-        nodes.update(str(edges[first]))
-        nodes.update(str(edges[second]))
+        pos_sample.append([str(edges[first]), str(edges[second])])
+        nodes.append(str(edges[first]))
+        nodes.append(str(edges[second]))
 
-        return pos_sample, nodes
+    return pos_sample, set(nodes)
